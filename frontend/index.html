@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GlowUp AI – Personalized Glow Up Tips</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .button-glow:hover {
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.7);
+    }
+  </style>
+</head>
+
+<body class="bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-200 min-h-screen">
+
+  <!-- Hero Section -->
+  <section class="text-center py-16">
+    <h1 class="text-5xl font-bold text-purple-800">GlowUp AI ✨</h1>
+    <p class="mt-4 text-gray-700 text-lg">
+      AI-powered face analysis for your ultimate personalized glow up
+    </p>
+  </section>
+
+  <!-- Upload Section -->
+  <section class="max-w-xl mx-auto bg-white rounded-2xl shadow-xl p-8">
+    <h2 class="text-2xl font-semibold text-center text-purple-700 mb-6">
+      Upload Your Photo
+    </h2>
+
+    <input id="photo" type="file" accept="image/*" 
+      class="w-full mb-4 border rounded p-3"/>
+
+    <button onclick="analyze()" 
+      class="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-xl transition button-glow">
+      Analyze My Face
+    </button>
+  </section>
+
+  <!-- Results Section -->
+  <section id="results" class="hidden max-w-xl mx-auto mt-10 bg-white rounded-2xl shadow-xl p-8">
+    <h2 class="text-2xl font-bold text-purple-700 mb-4">Your Results</h2>
+    <p><strong>Skin Type:</strong> <span id="skin"></span></p>
+    <p><strong>Face Shape:</strong> <span id="shape"></span></p>
+
+    <ul id="tips" class="list-disc pl-6 mt-4 text-gray-700"></ul>
+
+    <!-- Glow Up Plan -->
+    <div class="mt-8 p-6 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-2xl text-white shadow-lg">
+      <h3 class="text-xl font-bold mb-3">Your 7-Day Glow Up Plan</h3>
+      <ul id="plan" class="space-y-2"></ul>
+    </div>
+
+    <p class="text-xs text-gray-300 text-center mt-6">
+      This analysis is for educational purposes only.
+    </p>
+  </section>
+
+  <!-- JavaScript -->
+  <script>
+    async function analyze() {
+      const file = document.getElementById("photo").files[0];
+      if (!file) return alert("Please upload a photo first!");
+
+      const formData = new FormData();
+      formData.append("photo", file);
+
+      try {
+        const res = await fetch("http://localhost:8000/analyze", {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await res.json();
+
+        document.getElementById("skin").innerText = data.skin_type;
+        document.getElementById("shape").innerText = data.face_shape;
+
+        const tipsList = document.getElementById("tips");
+        tipsList.innerHTML = "";
+        data.tips.forEach(t => {
+          const li = document.createElement("li");
+          li.innerText = "✔ " + t;
+          tipsList.appendChild(li);
+        });
+
+        const planList = document.getElementById("plan");
+        planList.innerHTML = "";
+        data.plan.forEach(day => {
+          const li = document.createElement("li");
+          li.innerText = "✔ " + day;
+          planList.appendChild(li);
+        });
+
+        document.getElementById("results").classList.remove("hidden");
+
+      } catch (error) {
+        alert("Error connecting to backend. Make sure the API is running.");
+        console.error(error);
+      }
+    }
+  </script>
+
+</body>
+</html>
